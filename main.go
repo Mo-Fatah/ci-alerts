@@ -15,7 +15,7 @@ func main() {
 	commit := os.Getenv("commit")[0:7]
 	commit_url := os.Getenv("commit_url")
 	//run_url := os.Getenv("run_url")
-	workflow_run := os.Getenv("workflow_run")
+	workflow_run := os.Getenv("workflowrun")
 
 	var mention string
 	if event == "pr" {
