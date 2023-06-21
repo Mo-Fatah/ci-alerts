@@ -10,17 +10,9 @@ import (
 
 func main() {
 	hook := os.Getenv("webhook")
-	//hook, ok := core.GetInput("webhook")
-	//if !ok {
-	//	log.Fatal("webhook should be provided")
-	//}
-	//event, ok := core.GetInput("event")
-	//if !ok {
-	//	log.Fatal("event should be provided")
-	//}
-	//author, _ := core.GetInput("author")
 	event := os.Getenv("event")
-	author := ""
+	author := os.Getenv("author")
+	commit := os.Getenv("commit")
 
 	var mention string
 	if event == "pr" {
@@ -31,7 +23,7 @@ func main() {
 		log.Fatal("event type should be specified")
 	}
 
-	message := fmt.Sprintf("{\"text\":\"Hello, world. <%s> \"}", mention)
+	message := fmt.Sprintf("{\"text\":\"Failed Action <%s> \ncommit %s \"}", mention, commit)
 	body := strings.NewReader(message)
 	_, err := http.Post(hook, "Content-type: application/json", body)
 	if err != nil {
