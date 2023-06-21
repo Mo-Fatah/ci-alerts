@@ -1,0 +1,8 @@
+name: "ci-alerts"
+description: "a workspace alerts for CI failures"
+
+runs: 
+  using: composite
+  steps:
+    - run: go run main.go
+      shell: bash
