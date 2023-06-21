@@ -4,21 +4,23 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
-
-	"github.com/actions-go/toolkit/core"
 )
 
 func main() {
-	hook, ok := core.GetInput("webhook")
-	if !ok {
-		log.Fatal("webhook should be provided")
-	}
-	event, ok := core.GetInput("event")
-	if !ok {
-		log.Fatal("event should be provided")
-	}
-	author, _ := core.GetInput("author")
+	hook := os.Getenv("webhook")
+	//hook, ok := core.GetInput("webhook")
+	//if !ok {
+	//	log.Fatal("webhook should be provided")
+	//}
+	//event, ok := core.GetInput("event")
+	//if !ok {
+	//	log.Fatal("event should be provided")
+	//}
+	//author, _ := core.GetInput("author")
+	event := os.Getenv("event")
+	author := ""
 
 	var mention string
 	if event == "pr" {
