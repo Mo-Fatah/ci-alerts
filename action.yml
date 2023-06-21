@@ -1,8 +1,8 @@
-name: "ci-alerts"
-description: "a workspace alerts for CI failures"
+name: ci-alerts
+description: a workspace alerts for CI failures
 
 runs:
-  using: composite
+  using: 'composite'
   steps:
   - uses: actions/setup-go@v2
     with:
