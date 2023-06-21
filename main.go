@@ -12,7 +12,9 @@ func main() {
 	hook := os.Getenv("webhook")
 	event := os.Getenv("event")
 	author := os.Getenv("author")
-	commit := os.Getenv("commit")
+	commit := os.Getenv("commit")[0:7]
+	commit_url := os.Getenv("commit_url")
+	run_url := os.Getenv("run_url")
 
 	var mention string
 	if event == "pr" {
@@ -23,7 +25,7 @@ func main() {
 		log.Fatal("event type should be specified")
 	}
 
-	message := fmt.Sprintf("{\"text\":\"Failed Action <%s> \ncommit %s \"}", mention, commit)
+	message := fmt.Sprintf("{\"text\":\"Failed Action <%s> \ncommit <%s|%s>\n<%s|Workflow Run>\"}", mention, commit_url, commit, run_url)
 	body := strings.NewReader(message)
 	_, err := http.Post(hook, "Content-type: application/json", body)
 	if err != nil {
