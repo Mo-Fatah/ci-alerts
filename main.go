@@ -32,7 +32,11 @@ func NewContext() *Context {
 
 func main() {
 	context := NewContext()
-	message := buildMessage("CI Failed", context)
+	title := "CI Failed"
+	if context.event == "push" {
+		title += " On Main"
+	}
+	message := buildMessage(title, context)
 	body := strings.NewReader(message)
 	_, err := http.Post(context.webhook, "Content-type: application/json", body)
 	if err != nil {
