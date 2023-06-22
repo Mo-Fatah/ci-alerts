@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type Context struct {
@@ -33,12 +33,11 @@ func NewContext() *Context {
 func main() {
 	context := NewContext()
 	message := buildMessage("CI Failed", context)
-	body := []byte(message)
-	_, err := http.Post(context.webhook, "Content-type: application/json", bytes.NewBuffer(body))
+	body := strings.NewReader(message)
+	_, err := http.Post(context.webhook, "Content-type: application/json", body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(body)
 }
 
 func getAuthorSlackID(author string) string {
@@ -51,7 +50,7 @@ func buildMessage(title string, context *Context) string {
 		"type" : "header",
 		"text" : {
 			"type": "plain_text",
-			"text": %s
+			"text": "%s"
 		}
 	},`, title)
 	message += header
