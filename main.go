@@ -45,17 +45,15 @@ func getAuthorSlackID(author string) string {
 }
 
 func buildMessage(title string, context *Context) string {
-	var message string
 	header := fmt.Sprintf(`{
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "*%s*  <%s>"
+			"text": "*%s* <%s>"
 		}
 	},`, title, getMention(context))
-	message += header
-	message += buildSection(context)
-	message = fmt.Sprintf(`{"blocks":[%s]}`, message)
+	section := buildSection(context)
+	message := fmt.Sprintf(`{"blocks" : [ %s ], "attachments":[{ "color": "#a60021", "blocks": [ %s ] }]}`, header, section)
 	return message
 }
 
@@ -64,7 +62,7 @@ func buildSection(context *Context) string {
 	commit := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": ">*Commit*\n><%s|%s>"
+			"text": "*Commit*\n<%s|%s>"
 		},
 	`, context.commit_url, context.commit)
 	section += commit
@@ -72,7 +70,7 @@ func buildSection(context *Context) string {
 	failed_action := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": ">*Failed Action*\n>%s"
+			"text": "*Failed Action*\n%s"
 		},
 	`, context.workflow_name)
 	section += failed_action
@@ -80,7 +78,7 @@ func buildSection(context *Context) string {
 	action_url := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": ">*Workflow Url*\n>%s"
+			"text": "*Workflow Url*\n%s"
 		}
 	`, context.workflow_url)
 	section += action_url
