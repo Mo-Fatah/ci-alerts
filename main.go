@@ -15,7 +15,8 @@ func main() {
 	commit := os.Getenv("commit")[0:7]
 	commit_url := os.Getenv("commit_url")
 	//run_url := os.Getenv("run_url")
-	workflow_run := os.Getenv("workflowrun")
+	workflow_name := os.Getenv("workflow_name")
+	workflow_url := os.Getenv("workflow_url")
 
 	var mention string
 	if event == "pr" {
@@ -26,7 +27,7 @@ func main() {
 		log.Fatal("event type should be specified")
 	}
 
-	message := fmt.Sprintf("{\"text\":\"*CI Failed* <%s> \ncommit <%s|%s>\nworkflow_run:%s\"}", mention, commit_url, commit, workflow_run)
+	message := fmt.Sprintf("{\"text\":\"*CI Failed* <%s> \ncommit <%s|%s>\nworkflow failed:%s\nworkflow_url: %s\"}", mention, commit_url, commit, workflow_name, workflow_url)
 	body := strings.NewReader(message)
 	_, err := http.Post(hook, "Content-type: application/json", body)
 	if err != nil {
