@@ -47,12 +47,12 @@ func getAuthorSlackID(author string) string {
 func buildMessage(title string, context *Context) string {
 	var message string
 	header := fmt.Sprintf(`{
-		"type" : "header",
+		"type" : "section",
 		"text" : {
-			"type": "plain_text",
-			"text": "%s"
+			"type": "mrkdwn",
+			"text": "*%s*  <%s>"
 		}
-	},`, title)
+	},`, title, getMention(context))
 	message += header
 	message += buildSection(context)
 	message = fmt.Sprintf(`{"blocks":[%s]}`, message)
@@ -64,7 +64,7 @@ func buildSection(context *Context) string {
 	commit := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": "*Commit*\n<%s|%s>"
+			"text": ">*Commit*\n><%s|%s>"
 		},
 	`, context.commit_url, context.commit)
 	section += commit
@@ -72,7 +72,7 @@ func buildSection(context *Context) string {
 	failed_action := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": "*Failed Action*\n%s"
+			"text": ">*Failed Action*\n>%s"
 		},
 	`, context.workflow_name)
 	section += failed_action
@@ -80,26 +80,20 @@ func buildSection(context *Context) string {
 	action_url := fmt.Sprintf(`
 		{
 			"type": "mrkdwn",
-			"text": "*Workflow Url*\n%s"
-		},
+			"text": ">*Workflow Url*\n>%s"
+		}
 	`, context.workflow_url)
 	section += action_url
 
-	var mention string
-	if context.event == "pr" {
-		mention = getAuthorSlackID(context.author)
-	} else if context.event == "push" {
-		mention = "!channel"
-	} else {
-		log.Fatal("event type should be specified")
-	}
-	mention = fmt.Sprintf(`
-		{
-			"type": "mrkdwn",
-			"text": "<%s>" 
-		}
-	`, mention)
-	section += mention
 	section += `]}`
 	return section
+}
+
+func getMention(context *Context) string {
+	if context.event == "pr" {
+		return getAuthorSlackID(context.author)
+	} else if context.event == "push" {
+		return "!channel"
+	}
+	panic("event type should be specified")
 }
