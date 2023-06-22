@@ -26,11 +26,13 @@ func main() {
 		log.Fatal("event type should be specified")
 	}
 
-	message := fmt.Sprintf("{\"text\":\""+
-		"*CI Failed* <%s> \n"+
-		"commit <%s|%s>\n"+
-		"workflow failed:%s\n"+
-		"workflow_url: %s\"}",
+	message := fmt.Sprintf(`{"text": "
+	> *CI Failed*  
+	> *Commit* 
+	> <%s|%s>
+	> Workflow Failed: %s
+	> Workflow Url: %s
+	> <%s>"}`,
 		mention, commit_url, commit, workflow_name, workflow_url)
 	body := strings.NewReader(message)
 	_, err := http.Post(hook, "Content-type: application/json", body)
