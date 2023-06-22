@@ -44,10 +44,6 @@ func main() {
 	}
 }
 
-func getAuthorSlackID(author string) string {
-	return "@U04ML7YUSG7"
-}
-
 func buildMessage(title string, context *Context) string {
 	header := fmt.Sprintf(`{
 		"type" : "section",
@@ -92,10 +88,19 @@ func buildSection(context *Context) string {
 }
 
 func getMention(context *Context) string {
+	path := os.Getenv("users_path")
+	_, err := os.Stat(path)
+	if err != nil {
+		panic("file not found")
+	}
 	if context.event == "pr" {
 		return getAuthorSlackID(context.author)
 	} else if context.event == "push" {
 		return "!channel"
 	}
 	panic("event type should be specified")
+}
+
+func getAuthorSlackID(author string) string {
+	return "@U04ML7YUSG7"
 }
