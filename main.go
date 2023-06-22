@@ -28,12 +28,12 @@ func main() {
 
 	message := fmt.Sprintf(`{"text": "
 	> *CI Failed*  
-	> *Commit* 
-	> <%s|%s>
-	> Workflow Failed: %s
-	> Workflow Url: %s
-	> <%s>"}`,
-		mention, commit_url, commit, workflow_name, workflow_url)
+	 *Commit* 
+	 <%s|%s>
+	 Workflow Failed: %s
+	 Workflow Url: %s
+	 <%s>"}`,
+		commit_url, commit, workflow_name, workflow_url, mention)
 	body := strings.NewReader(message)
 	_, err := http.Post(hook, "Content-type: application/json", body)
 	if err != nil {
