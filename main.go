@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net/http"
@@ -49,7 +50,7 @@ func buildMessage(title string, context *Context) string {
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "*%s* <%s>"
+			"text": "*%s* %s"
 		}
 	},`, title, getMention(context))
 	section := buildSection(context)
@@ -88,19 +89,30 @@ func buildSection(context *Context) string {
 }
 
 func getMention(context *Context) string {
-	path := os.Getenv("users_path")
-	_, err := os.Stat(path)
-	if err != nil {
-		panic(fmt.Sprintf("file not found %s. %s", err, path))
-	}
 	if context.event == "pr" {
 		return getAuthorSlackID(context.author)
 	} else if context.event == "push" {
-		return "!channel"
+		return "<!channel>"
 	}
 	panic("event type should be specified")
 }
 
 func getAuthorSlackID(author string) string {
-	return "@U04ML7YUSG7"
+	path := os.Getenv("users_path")
+	file, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lineArr := strings.Split(scanner.Text(), ":")
+		if len(lineArr) == 2 {
+			if lineArr[0] == author {
+				return fmt.Sprintf("<@%s>", lineArr[1])
+			}
+		}
+	}
+	os.Exit(0) // exit the program, to prevent any notification from unknown authors' PRs
+	return ""
 }
