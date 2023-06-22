@@ -91,7 +91,7 @@ func getMention(context *Context) string {
 	path := os.Getenv("users_path")
 	_, err := os.Stat(path)
 	if err != nil {
-		panic("file not found")
+		panic(fmt.Sprintf("file not found %s. %s", err, path))
 	}
 	if context.event == "pr" {
 		return getAuthorSlackID(context.author)
