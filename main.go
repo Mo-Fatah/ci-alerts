@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type Context struct {
@@ -33,8 +33,8 @@ func NewContext() *Context {
 func main() {
 	context := NewContext()
 	message := buildMessage("CI Failed", context)
-	body := strings.NewReader(message)
-	_, err := http.Post(context.webhook, "Content-type: application/json", body)
+	body := []byte(message)
+	_, err := http.Post(context.webhook, "Content-type: application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Fatal(err)
 	}
