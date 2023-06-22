@@ -43,11 +43,11 @@ func main() {
 
 	message := fmt.Sprintf(`{"text": "
 	>*CI Failed*  
-	>*Commit* 
-	><%s|%s>
-	>Workflow Failed: %s
-	>Workflow Url: %s
-	><%s>"}`,
+*Commit* 
+<%s|%s>
+Workflow Failed: %s
+Workflow Url: %s
+<%s>"}`,
 		context.commit_url, context.commit, context.workflow_name, context.workflow_url, mention)
 	body := strings.NewReader(message)
 	_, err := http.Post(context.webhook, "Content-type: application/json", body)
