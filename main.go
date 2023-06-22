@@ -54,51 +54,36 @@ func buildMessage(title string, context *Context) string {
 		}
 	},`, title)
 	message += header
-	sections := buildSections(context)
-	for _, s := range sections {
-		message += s
-	}
+	message += buildSection(context)
 	message = fmt.Sprintf(`{"blocks":[%s]}`, message)
 	return message
 }
 
-func buildSections(context *Context) []string {
-	var sections []string
-	commit := fmt.Sprintf(`{
-		"type": "section",
-		"fields": [
-			{
-				"type": "mrkdwn",
-				"text": "*Commit*\n<%s|%s>"
-			}
-		]
-	},
+func buildSection(context *Context) string {
+	section := `{"type": "section", "fields":[`
+	commit := fmt.Sprintf(`
+		{
+			"type": "mrkdwn",
+			"text": "*Commit*\n<%s|%s>"
+		},
 	`, context.commit_url, context.commit)
-	sections = append(sections, commit)
+	section += commit
 
-	failed_action := fmt.Sprintf(`{
-		"type": "section",
-		"fields": [
-			{
-				"type": "mrkdwn",
-				"text": "*Failed Action*\n%s"
-			}
-		]
-	},
+	failed_action := fmt.Sprintf(`
+		{
+			"type": "mrkdwn",
+			"text": "*Failed Action*\n%s"
+		},
 	`, context.workflow_name)
-	sections = append(sections, failed_action)
+	section += failed_action
 
-	action_url := fmt.Sprintf(`{
-		"type": "section",
-		"fields": [
-			{
-				"type": "mrkdwn",
-				"text": "*Failed Action Url*\n%s"
-			}
-		]
-	},
+	action_url := fmt.Sprintf(`
+		{
+			"type": "mrkdwn",
+			"text": "*Workflow Url*\n%s"
+		},
 	`, context.workflow_url)
-	sections = append(sections, action_url)
+	section += action_url
 
 	var mention string
 	if context.event == "pr" {
@@ -108,16 +93,13 @@ func buildSections(context *Context) []string {
 	} else {
 		log.Fatal("event type should be specified")
 	}
-	mention = fmt.Sprintf(`{
-		"type": "section",
-		"fields": [
-			{
-				"type": "mrkdwn",
-				"text": "<%s>"
-			}
-		]
-	}
+	mention = fmt.Sprintf(`
+		{
+			"type": "mrkdwn",
+			"text": "<%s>" 
+		}
 	`, mention)
-	sections = append(sections, mention)
-	return sections
+	section += mention
+	section += `]}`
+	return section
 }
