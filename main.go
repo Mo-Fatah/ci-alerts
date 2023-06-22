@@ -32,18 +32,7 @@ func NewContext() *Context {
 
 func main() {
 	context := NewContext()
-	var mention string
-	if context.event == "pr" {
-		mention = getAuthorSlackID(context.author)
-	} else if context.event == "push" {
-		mention = "!channel"
-	} else {
-		log.Fatal("event type should be specified")
-	}
-
-	message := fmt.Sprintf(`{"text": "
-	>*CI Failed* \n>*Commit* \n><%s|%s> \n>Workflow Failed: %s \n>Workflow Url: %s \n><%s>"}`,
-		context.commit_url, context.commit, context.workflow_name, context.workflow_url, mention)
+	message := buildMessage("CI Failed", context)
 	body := strings.NewReader(message)
 	_, err := http.Post(context.webhook, "Content-type: application/json", body)
 	if err != nil {
@@ -53,4 +42,82 @@ func main() {
 
 func getAuthorSlackID(author string) string {
 	return "@U04ML7YUSG7"
+}
+
+func buildMessage(title string, context *Context) string {
+	var message string
+	header := fmt.Sprintf(`{
+		"type" : "header",
+		"text" : {
+			"type": "plain_text",
+			"text": %s
+		}
+	},`, title)
+	message += header
+	sections := buildSections(context)
+	for _, s := range sections {
+		message += s
+	}
+	message = fmt.Sprintf(`{"blocks":[%s]}`, message)
+	return message
+}
+
+func buildSections(context *Context) []string {
+	var sections []string
+	commit := fmt.Sprintf(`{
+		"type": "section",
+		"fields": [
+			{
+				"type": "mrkdwn",
+				"text": "*Commit*\n<%s|%s>"
+			}
+		]
+	},
+	`, context.commit_url, context.commit)
+	sections = append(sections, commit)
+
+	failed_action := fmt.Sprintf(`{
+		"type": "section",
+		"fields": [
+			{
+				"type": "mrkdwn",
+				"text": "*Failed Action*\n%s"
+			}
+		]
+	},
+	`, context.workflow_name)
+	sections = append(sections, failed_action)
+
+	action_url := fmt.Sprintf(`{
+		"type": "section",
+		"fields": [
+			{
+				"type": "mrkdwn",
+				"text": "*Failed Action Url*\n%s"
+			}
+		]
+	},
+	`, context.workflow_url)
+	sections = append(sections, action_url)
+
+	var mention string
+	if context.event == "pr" {
+		mention = getAuthorSlackID(context.author)
+	} else if context.event == "push" {
+		mention = "!channel"
+	} else {
+		log.Fatal("event type should be specified")
+	}
+	mention = fmt.Sprintf(`{
+		"type": "section",
+		"fields": [
+			{
+				"type": "mrkdwn",
+				"text": "<%s>"
+			}
+		]
+	}
+	`, mention)
+	sections = append(sections, mention)
+	return sections
 }
