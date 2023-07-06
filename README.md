@@ -21,7 +21,7 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           event: push
           commit: ${{ github.sha }}
-          commit_url: https://github.com/Mo-Fatah/test-alerts/commit/${{ github.sha }}
+          commit_url: https://github.com/organization/repository/commit/${{ github.sha }}
           author: ${{ github.actor }}
           workflow_name: ${{ github.event.workflow_run.name }}
           workflow_url: ${{ github.event.workflow_run.html_url}}
@@ -49,7 +49,7 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           event: pr
           commit: ${{ github.sha }}
-          commit_url: https://github.com/Mo-Fatah/test-alerts/commit/${{ github.sha }}
+          commit_url: https://github.com/organization/repository/commit/${{ github.sha }}
           author: ${{ github.actor }}
           workflow_name: ${{ github.event.workflow_run.name }}
           workflow_url: ${{ github.event.workflow_run.html_url}}
