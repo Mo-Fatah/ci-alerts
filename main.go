@@ -3,8 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -32,17 +30,18 @@ func NewContext() *Context {
 }
 
 func main() {
-	context := NewContext()
-	title := "CI Failed"
-	if context.event == "push" {
-		title += " On Main"
-	}
-	message := buildMessage(title, context)
-	body := strings.NewReader(message)
-	_, err := http.Post(context.webhook, "Content-type: application/json", body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fmt.Println(os.Getenv("GITHUB_CONTEXT"))
+	//context := NewContext()
+	//title := "CI Failed"
+	//if context.event == "push" {
+	//	title += " On Main"
+	//}
+	//message := buildMessage(title, context)
+	//body := strings.NewReader(message)
+	//_, err := http.Post(context.webhook, "Content-type: application/json", body)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 }
 
 func buildMessage(title string, context *Context) string {
