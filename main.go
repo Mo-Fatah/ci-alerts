@@ -82,7 +82,6 @@ func main() {
 	title := "CI Failed"
 	message := buildMessage(title, context)
 	body := strings.NewReader(message)
-	fmt.Println(body)
 	_, err = http.Post(context.Webhook, "Content-type: application/json", body)
 	if err != nil {
 		log.Fatal(err)
