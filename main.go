@@ -93,7 +93,7 @@ func buildMessage(title string, context *Context) string {
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "*%s* %s\nBranch: *%s*"
+			"text": "*%s* %s \nBranch: *%s*"
 		}
 	},`, title, getMention(context), context.Branch)
 	section := buildSection(context)
@@ -161,6 +161,7 @@ func getAuthorSlackID(author string) string {
 		lineArr := strings.Split(scanner.Text(), ":")
 		if len(lineArr) == 2 {
 			if lineArr[0] == author {
+				panic(lineArr[1])
 				return fmt.Sprintf("<@%s>", lineArr[1])
 			}
 		}
