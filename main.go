@@ -153,6 +153,7 @@ func getAuthorSlackID(author string) string {
 	path := os.Getenv("users_path")
 	file, err := os.Open(path)
 	if err != nil {
+		panic(err)
 		return ""
 	}
 	defer file.Close()
