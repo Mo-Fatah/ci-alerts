@@ -80,16 +80,13 @@ func main() {
 		log.Fatal(err)
 	}
 	title := "CI Failed"
-	if context.TriggeringEvent == "push" {
-		title += " On Master"
-	}
 	message := buildMessage(title, context)
 	body := strings.NewReader(message)
 	fmt.Println(body)
-	//_, err = http.Post(context.Webhook, "Content-type: application/json", body)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	_, err = http.Post(context.Webhook, "Content-type: application/json", body)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func buildMessage(title string, context *Context) string {
