@@ -69,12 +69,12 @@ func NewContext(Webhook, github_context string) (*Context, error) {
 }
 
 func buildMessage(context *Context) string {
-	title := fmt.Sprintf("CI Failed For Branch: *%s*", context.Branch)
+	title := fmt.Sprintf("CI Failed For Branch: %s", context.Branch)
 	header := fmt.Sprintf(`{
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "%s %s"
+			"text": "*%s*\n %s"
 		}
 	},`, title, getMention(context))
 	section := buildSection(context)
