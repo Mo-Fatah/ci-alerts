@@ -53,25 +53,6 @@ func NewContext(Webhook, github_context string) (*Context, error) {
 	}, nil
 }
 
-//func getContextEnv() string {
-//
-//	file, err := os.Open("ctx")
-//	if err != nil {
-//		panic(err)
-//	}
-//	defer file.Close()
-//	var str string
-//	for {
-//		buf := make([]byte, 1024)
-//		read, _ := file.Read(buf)
-//		if read == 0 {
-//			break
-//		}
-//		str += string(buf[:read])
-//	}
-//	return str
-//}
-
 func main() {
 	webhook := os.Getenv("webhook")
 	github_context := os.Getenv("github_context")
@@ -79,8 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	title := "CI Failed"
-	message := buildMessage(title, context)
+	message := buildMessage(context)
 	body := strings.NewReader(message)
 	_, err = http.Post(context.Webhook, "Content-type: application/json", body)
 	if err != nil {
@@ -88,14 +68,15 @@ func main() {
 	}
 }
 
-func buildMessage(title string, context *Context) string {
+func buildMessage(context *Context) string {
+	title := fmt.Sprintf("CI Failed On %s", context.Branch)
 	header := fmt.Sprintf(`{
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "*%s* %s \nBranch: *%s*"
+			"text": "*%s* %s"
 		}
-	},`, title, getMention(context), context.Branch)
+	},`, title, getMention(context))
 	section := buildSection(context)
 	message := fmt.Sprintf(`{"blocks" : [ %s ], "attachments":[{ "color": "#a60021", "blocks": [ %s ] }]}`, header, section)
 	return message
@@ -125,7 +106,7 @@ func buildSection(context *Context) string {
 			"type": "mrkdwn",
 			"text": "*Commit*\n<%s|%s>"
 		},
-	`, context.CommitUrl, context.Commit)
+	`, context.CommitUrl, context.Commit[:6])
 	section += commit
 
 	action_url := fmt.Sprintf(`
@@ -141,19 +122,19 @@ func buildSection(context *Context) string {
 }
 
 func getMention(context *Context) string {
+	branch := strings.ToLower(context.Branch)
 	if context.TriggeringEvent == "pull_request" {
 		return getAuthorSlackID(context.Author)
-	} else if context.TriggeringEvent == "push" {
+	} else if context.TriggeringEvent == "push" && (branch == "main" || branch == "master") {
 		return "<!channel>"
 	}
-	panic("event type should be specified")
+	return ""
 }
 
 func getAuthorSlackID(author string) string {
 	path := os.Getenv("users_path")
 	file, err := os.Open(path)
 	if err != nil {
-		panic(err)
 		return ""
 	}
 	defer file.Close()
@@ -162,7 +143,6 @@ func getAuthorSlackID(author string) string {
 		lineArr := strings.Split(scanner.Text(), ":")
 		if len(lineArr) == 2 {
 			if lineArr[0] == author {
-				panic(lineArr[1])
 				return fmt.Sprintf("<@%s>", lineArr[1])
 			}
 		}
