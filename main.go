@@ -12,6 +12,21 @@ import (
 	"github.com/antchfx/jsonquery"
 )
 
+func main() {
+	webhook := os.Getenv("webhook")
+	github_context := os.Getenv("github_context")
+	context, err := NewContext(webhook, github_context)
+	if err != nil {
+		log.Fatal(err)
+	}
+	message := buildMessage(context)
+	body := strings.NewReader(message)
+	_, err = http.Post(context.Webhook, "Content-type: application/json", body)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 type Context struct {
 	Webhook         string
 	TriggeringEvent string
@@ -53,28 +68,13 @@ func NewContext(Webhook, github_context string) (*Context, error) {
 	}, nil
 }
 
-func main() {
-	webhook := os.Getenv("webhook")
-	github_context := os.Getenv("github_context")
-	context, err := NewContext(webhook, github_context)
-	if err != nil {
-		log.Fatal(err)
-	}
-	message := buildMessage(context)
-	body := strings.NewReader(message)
-	_, err = http.Post(context.Webhook, "Content-type: application/json", body)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func buildMessage(context *Context) string {
-	title := fmt.Sprintf("CI Failed For %s", context.Branch)
+	title := fmt.Sprintf("CI Failed For Branch: *%s*", context.Branch)
 	header := fmt.Sprintf(`{
 		"type" : "section",
 		"text" : {
 			"type": "mrkdwn",
-			"text": "*%s* %s"
+			"text": "%s %s"
 		}
 	},`, title, getMention(context))
 	section := buildSection(context)
