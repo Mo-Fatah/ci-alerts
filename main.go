@@ -123,10 +123,10 @@ func buildSection(context *Context) string {
 
 func getMention(context *Context) string {
 	branch := strings.ToLower(context.Branch)
-	if context.TriggeringEvent == "pull_request" {
-		return getAuthorSlackID(context.Author)
-	} else if branch == "main" || branch == "master" {
+	if branch == "main" || branch == "master" {
 		return "<!channel>"
+	} else if context.TriggeringEvent == "pull_request" || context.TriggeringEvent == "push" {
+		return getAuthorSlackID(context.Author)
 	}
 	return ""
 }
