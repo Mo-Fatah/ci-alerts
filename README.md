@@ -1,61 +1,40 @@
 ## CI Alerts
-a simple action to customize Slack alerts for CI failures using Slack [Webhooks](https://api.slack.com/messaging/webhooks). The Alerts can be configured mention a slack a channel, if a failure happened on the main/master branch or mention the author if it is a pull request.
 
-## Usage
+a simple action to customize Slack alerts for CI failures using Slack [Webhooks](https://api.slack.com/messaging/webhooks). Simply, the action will send a message to a slack channel when a CI job fails in two cases: 
 
-### Master/Main CI Failure
+- If the job is triggered by a pull_request AND the author of the PR is in the `users_path` file, the author will be mentioned in the message. the message will be as the following:
+
+<img src="./example.png" width="400"/>
+
+- If the job is triggered by a push to the `master` branch, the message will be sent to the channel with mentioning the channel.
+
+## Usage Example
 ```yaml
-name: Alerts
+name: Slack CI Alerts
+
 on:
   workflow_run:
-    workflows: [Go]
+    workflows: [Test, Build, ...]
     types: [completed]
 
 jobs:
-  on_push_failure:
+  on-failure:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'master'
+    if: github.event.workflow_run.conclusion == 'failure' 
     steps:
-      - uses: Mo-Fatah/ci-alerts@v1
+      - uses: actions/checkout@v3.3.0
+      - name: "Send Notification"
+        uses: Mo-Fatah/ci-alerts@v2
         env: 
           webhook: ${{ secrets.SLACK_WEBHOOK }}
-          event: push
-          commit: ${{ github.sha }}
-          commit_url: https://github.com/organization/repository/commit/${{ github.sha }}
-          author: ${{ github.actor }}
-          workflow_name: ${{ github.event.workflow_run.name }}
-          workflow_url: ${{ github.event.workflow_run.html_url}}
+          github_context: ${{ toJSON(github) }}
+          users_path: ${{github.workspace}}/.github/gh-to-slackid
 ```
-The above example will trigger the `Alerts` action after the `Go` action is `completed`. If the `Go` action failed and the current branch is `master`, the job will be run. The environment variables below should be provided for the slack message customization. This message will mention the `channel` configured in the webhook to alert the team.
+### Environment Variables
+- `webhook`: the slack webhook url. [see more](https://api.slack.com/messaging/webhooks).
+- `github_context`: the github context. you can get it from `${{ toJSON(github) }}`.
+- `users_path`: the path to the file that contains the mapping from a github username to a slack [client id](https://api.slack.com/authentication/best-practices#client-id) so the author can be mentioned in the message. If the author doesn't exist in the file, no message will be sent to the slack channel.
 
-
-### PR CI Failure
-
-```yaml
-name: Alerts
-on:
-  workflow_run:
-    workflows: [Go]
-    types: [completed]
-
-jobs:
-  on_pull_request_failure:
-    runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'pull_request'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: Mo-Fatah/ci-alerts@v1
-        env: 
-          webhook: ${{ secrets.SLACK_WEBHOOK }}
-          event: pr
-          commit: ${{ github.sha }}
-          commit_url: https://github.com/organization/repository/commit/${{ github.sha }}
-          author: ${{ github.actor }}
-          workflow_name: ${{ github.event.workflow_run.name }}
-          workflow_url: ${{ github.event.workflow_run.html_url}}
-          users_path: ${{github.workspace}}/.github/github-to-slack
-```
-This will run if the `Go` action failed on a PR. you should provide `users_path`, which is the path to the file that contains the mapping from a github username to a slack [client id](https://api.slack.com/authentication/best-practices#client-id) so the author can be mentioned in the message. If the author doesn't exist in the file, no message will be sent to the slack channel.
 The format of the file should be as :
 ```
 github-username:slack-id
